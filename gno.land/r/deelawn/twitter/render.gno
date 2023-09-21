@@ -2,6 +2,7 @@ package twitter
 
 import (
 	"std"
+	"strconv"
 	"strings"
 
 	"gno.land/p/demo/avl"
@@ -10,6 +11,8 @@ import (
 const (
 	baseRelativeURL string = "../deelawn/twitter:"
 	timestampFmt    string = "2006-01-02 15:04:05"
+
+	err404 string = "404 not found"
 )
 
 // Render examines the provided path and renders the appropriate content.
@@ -22,23 +25,44 @@ func Render(path string) string {
 		return renderLinksToAllUsers()
 	}
 
-	// Render the user page that displays all of their tweets.
 	if pathParts[0] == "users" {
-		var userAddress string
-		if len(pathParts) > 1 {
-			userAddress = pathParts[1]
+
+		if len(pathParts) == 1 {
+			return renderLinksToAllUsers()
 		}
 
-		renderedUser, err := renderUser(userAddress)
-		if err != nil {
-			return err.Error() + pathParts[1]
+		userAddress := pathParts[1]
+
+		// Render the user page that displays all of their tweets.
+		if len(pathParts) == 2 {
+			renderedUser, err := renderUser(userAddress)
+			if err != nil {
+				return err.Error()
+			}
+
+			return renderedUser
 		}
 
-		return renderedUser
+		// There must be least 3 path parts to get here.
+		if pathParts[2] == "follows" {
+			// Render the page that shows all the users a user follows.
+			renderedFollows, err := renderFollows(userAddress)
+			if err != nil {
+				return err.Error()
+			}
+
+			return renderedFollows
+		}
+
+		return ""
 	}
 
 	// Render a specific tweet with all of its comments.
 	if pathParts[0] == "tweets" {
+		if len(pathParts) == 1 {
+			// We aren't going to render all tweets.
+			return err404
+		}
 		var tweetID string
 		if len(pathParts) > 1 {
 			tweetID = pathParts[1]
@@ -57,7 +81,7 @@ func Render(path string) string {
 		return renderTweetWithComments(tweet)
 	}
 
-	return "404 not found"
+	return err404
 }
 
 // renderLinksToAllUsers generates a homepage of sorts with links to all users.
@@ -89,7 +113,10 @@ func renderUser(address string) (string, error) {
 	}
 
 	b := strings.Builder{}
-	b.WriteString("<h1>User: " + address + "</h1></br>")
+	b.WriteString("<h1>User: " + address + "</h1>")
+	numFollowers := strconv.Itoa(len(user.Follows))
+	b.WriteString(`<h3><a href="` + address + `/follows">Follows ` + numFollowers + `</a></h3>`)
+	b.WriteString("<h3>Tweets</h3>")
 
 	// Render each tweet in the reverse order.
 	for i := len(user.Tweets) - 1; i >= 0; i-- {
@@ -167,8 +194,23 @@ func renderComment(comment *Comment) string {
 	return b.String()
 }
 
-// renderLink generates a string that links the given text to the provided path.
-// func renderLink(path string, text string) string {
-// 	// TODO: why doesn't fmt package work?
-// 	return "[" + text + "](" + urlBasePath + path + ")"
-// }
+// renderFollows renders a page that shows all the users that the user with the given
+// address follows.
+func renderFollows(address string) (string, error) {
+
+	user, err := resolveUser(std.Address(address), false)
+	if err != nil {
+		return "", err
+	}
+
+	b := strings.Builder{}
+	b.WriteString("<h1>" + address + " Follows</h1>")
+
+	// Render each user that the user follows.
+	for _, followedUser := range user.Follows {
+		b.WriteString(`<a href="../../` + baseRelativeURL + `users/` + followedUser.Address.String() + `">` + followedUser.Address.String() + `</a></br>`)
+		// b.WriteString(renderLink(":users/"+followedUser.Address.String(), followedUser.Address.String()) + "</br>")
+	}
+
+	return b.String(), nil
+}
