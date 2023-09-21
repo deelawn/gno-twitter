@@ -8,6 +8,10 @@ import (
 	"gno.land/p/demo/avl"
 )
 
+const (
+	maxTweetLength uint = 140
+)
+
 var (
 	// Users represents all users that have ever posted a tweet.
 	Users *avl.Tree
@@ -27,6 +31,10 @@ func init() {
 // list of tweets for the user that called this function. It returns a reference
 // to the new tweet.
 func PostTweet(content string) *Tweet {
+
+	if r := []rune(content); len(r) > maxTweetLength {
+		panic("tweet is too long")
+	}
 
 	author := std.GetOrigCaller()
 	user, err := resolveUser(author, true)
@@ -48,4 +56,42 @@ func PostTweet(content string) *Tweet {
 	tweetCounter++
 
 	return tweet
+}
+
+// PostComment will create a new comment on the tweet with the given ID and add it to the
+// list of comments for the user that called this function. It returns a reference
+// to the new comment.
+func PostComment(tweetID string, content string) *Comment {
+
+	if r := []rune(content); len(r) > maxTweetLength {
+		panic("comment is too long")
+	}
+
+	author := std.GetOrigCaller()
+	user, err := resolveUser(author, true)
+	if err != nil {
+		panic(err)
+	}
+
+	tweetIface, exists := Tweets.Get(tweetID)
+	if !exists {
+		panic("tweet does not exist")
+	}
+
+	tweet, ok := tweetIface.(*Tweet)
+	if !ok {
+		panic("invalid tweet schema")
+	}
+
+	comment := &Comment{
+		Author:    user,
+		Timestamp: time.Now(),
+		Tweet:     tweet,
+		Content:   content,
+	}
+
+	tweet.Comments = append(tweet.Comments, comment)
+	user.Comments = append(user.Comments, comment)
+
+	return comment
 }

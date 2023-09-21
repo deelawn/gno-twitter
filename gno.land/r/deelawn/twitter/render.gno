@@ -142,6 +142,7 @@ func renderTweetWithComments(tweet *Tweet) string {
 
 	b := strings.Builder{}
 	b.WriteString(renderTweet(tweet, true, false))
+	b.WriteString("<h3>Comments</h3>")
 
 	// Render each comment in the order they were made.
 	for _, comment := range tweet.Comments {
@@ -160,7 +161,7 @@ func renderComment(comment *Comment) string {
 
 	b.WriteString("<h4>")
 	b.WriteString(comment.Author.Address.String() + " -- ")
-	b.WriteString(comment.Timestamp.Format(timestampFmt) + "</h4></br>")
+	b.WriteString(comment.Timestamp.Format(timestampFmt) + "</h4>")
 	b.WriteString(comment.Content + "</br>")
 
 	return b.String()
