@@ -95,3 +95,22 @@ func PostComment(tweetID string, content string) *Comment {
 
 	return comment
 }
+
+// FollowUser will add the user with the given address to the list of users that the
+// user that called this function follows.
+func FollowUser(address std.Address) {
+
+	author := std.GetOrigCaller()
+	user, err := resolveUser(author, true)
+	if err != nil {
+		panic(err)
+	}
+
+	if author.String() == address.String() {
+		panic("user cannot follow themself")
+	}
+
+	if err := user.Follow(address); err != nil {
+		panic(err)
+	}
+}
