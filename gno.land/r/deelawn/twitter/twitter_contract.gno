@@ -32,11 +32,16 @@ func init() {
 // to the new tweet.
 func PostTweet(content string) *Tweet {
 
+	author := std.GetOrigCaller()
+	return postTweet(author, content)
+}
+
+func postTweet(author std.Address, content string) *Tweet {
+
 	if r := []rune(content); len(r) > maxTweetLength {
 		panic("tweet is too long")
 	}
 
-	author := std.GetOrigCaller()
 	user, err := resolveUser(author, true)
 	if err != nil {
 		panic(err)
@@ -63,11 +68,16 @@ func PostTweet(content string) *Tweet {
 // to the new comment.
 func PostComment(tweetID string, content string) *Comment {
 
+	author := std.GetOrigCaller()
+	return postComment(author, tweetID, content)
+}
+
+func postComment(author std.Address, tweetID string, content string) *Comment {
+
 	if r := []rune(content); len(r) > maxTweetLength {
 		panic("comment is too long")
 	}
 
-	author := std.GetOrigCaller()
 	user, err := resolveUser(author, true)
 	if err != nil {
 		panic(err)
@@ -101,6 +111,10 @@ func PostComment(tweetID string, content string) *Comment {
 func FollowUser(address std.Address) {
 
 	author := std.GetOrigCaller()
+	followUser(author, address)
+}
+
+func followUser(author std.Address, address std.Address) {
 	user, err := resolveUser(author, true)
 	if err != nil {
 		panic(err)
