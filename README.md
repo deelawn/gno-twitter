@@ -13,11 +13,23 @@ The three supported operations are:
 
 Supported html renderings are mapped below, URL -> data displayed.
 
-- `.../twitter` -> displays a list of all users addresses that have posted a tweet or comment
-- `.../twitter:users` -> same as previous
-- `.../twitter:users/<user address>` -> displays the number of users they follow and a list of condensed tweets, ordered by newest
-- `.../twitter:users/<user address>/follows` -> displays a list of all users the user with this address follows
-- `.../twitter:tweets/<tweet id>` -> displays a full tweet and all comments, ordered by oldest
+`.../twitter` -> displays a list of all users addresses that have posted a tweet or comment
+
+![users](users.png "Users")
+
+`.../twitter:users` -> same as previous
+
+`.../twitter:users/<user address>` -> displays the number of users they follow and a list of condensed tweets, ordered by newest
+
+![user](user.png "User")
+
+`.../twitter:users/<user address>/follows` -> displays a list of all users the user with this address follows
+
+![follows](follows.png "follows")
+
+`.../twitter:tweets/<tweet id>` -> displays a full tweet and all comments, ordered by oldest
+
+![tweet](tweet.png "Tweet")
 
 ## Testing
 
